@@ -31,7 +31,7 @@ export function MonthCalendar({
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
   const maxDate = new Date(today.getFullYear(), today.getMonth() + 9, 0);
-  const minSelectable = new Date(today.getTime() + 86400000 * 2); // require 2 days notice
+  const minSelectable = today; // same-day booking is allowed
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();

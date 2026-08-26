@@ -27,6 +27,17 @@ export function isVenueClosed(date: Date): boolean {
   return day === 0 || day === 1;
 }
 
+function slotToMinutes(slot: string): number {
+  const match = slot.match(/(\d+):(\d+)\s?(AM|PM)/i);
+  if (!match) return 0;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const meridiem = match[3].toUpperCase();
+  if (meridiem === "PM" && hours !== 12) hours += 12;
+  if (meridiem === "AM" && hours === 12) hours = 0;
+  return hours * 60 + minutes;
+}
+
 /** Returns the list of open (not-yet-booked) tour times for a given date. */
 export function getAvailability(dateISO: string): string[] {
   const date = new Date(dateISO + "T00:00:00");
@@ -41,7 +52,19 @@ export function getAvailability(dateISO: string): string[] {
     busyIndexes.add((seed + i * 3) % ALL_SLOTS.length);
   }
 
-  return ALL_SLOTS.filter((_, idx) => !busyIndexes.has(idx));
+  let slots = ALL_SLOTS.filter((_, idx) => !busyIndexes.has(idx));
+
+  // Same-day booking is allowed, but only for slots that haven't passed yet
+  // (with a 1-hour lead time so a visitor can't book a tour starting in the
+  // next few minutes).
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) {
+    const cutoffMinutes = now.getHours() * 60 + now.getMinutes() + 60;
+    slots = slots.filter((slot) => slotToMinutes(slot) >= cutoffMinutes);
+  }
+
+  return slots;
 }
 
 export function getAllSlots(): string[] {
