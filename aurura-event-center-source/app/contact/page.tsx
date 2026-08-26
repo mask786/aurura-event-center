@@ -70,6 +70,11 @@ export default function ContactPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setSent(true);
+                fetch("/api/contact", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(form),
+                }).catch((err) => console.error("Failed to send contact email", err));
               }}
               className="space-y-5"
             >

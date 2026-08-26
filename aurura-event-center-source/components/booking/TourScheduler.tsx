@@ -94,6 +94,22 @@ export function TourScheduler() {
 
     setConfirming(false);
     setConfirmed({ date: selectedDate, time: selectedTime });
+
+    fetch("/api/tour-confirmation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        date: selectedDate,
+        time: selectedTime,
+        eventType: form.eventType,
+        guestCount: form.guestCount,
+        notes: form.notes,
+      }),
+    }).catch((err) => console.error("Failed to send tour confirmation email", err));
   }
 
   if (confirmed) {

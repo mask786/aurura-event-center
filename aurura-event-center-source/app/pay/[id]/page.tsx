@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Lock, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { getBooking, updateBooking, type Booking } from "@/lib/booking";
-import { formatCurrency } from "@/lib/pricing";
-import { venue } from "@/lib/config";
+import { formatCurrency, getPackage } from "@/lib/pricing";
+import { venue, eventTypes } from "@/lib/config";
 import { Reveal } from "@/components/ui/Reveal";
 
 export default function PayPage() {
@@ -57,6 +57,27 @@ export default function PayPage() {
       },
     });
     setPaying(false);
+
+    const pkg = booking.estimate ? getPackage(booking.estimate.packageId) : undefined;
+    const eventTypeName = booking.estimate ? eventTypes.find((e) => e.id === booking.estimate!.eventType)?.name.en : undefined;
+    fetch("/api/booking-confirmation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookingId: booking.id,
+        firstName: booking.lead?.firstName,
+        lastName: booking.lead?.lastName,
+        email: booking.lead?.email,
+        eventType: eventTypeName,
+        eventDate: booking.estimate?.eventDate,
+        packageName: pkg?.name.en,
+        total: formatCurrency(booking.quote!.finalTotal),
+        depositPaid: formatCurrency(booking.quote!.deposit),
+        balance: formatCurrency(booking.quote!.balance),
+        nextPaymentDue: nextPaymentDate.toLocaleDateString(),
+      }),
+    }).catch((err) => console.error("Failed to send booking confirmation email", err));
+
     router.push(`/confirmation/${booking.id}`);
   }
 
