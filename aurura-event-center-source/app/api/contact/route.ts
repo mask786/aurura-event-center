@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail, emailShell, venueNotifyAddress } from "@/lib/email";
+import { sendEmailSafe, emailShell, venueNotifyAddress } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
       <p style="margin-top:14px; padding:16px; background:#faf6ef; font-size:13px; color:#4a453d; white-space:pre-wrap;">${message}</p>
     `);
 
-    await Promise.all([
-      sendEmail({ to: email, subject: "We received your message — Aurura Event Center", html: customerHtml }),
-      sendEmail({ to: venueNotifyAddress(), subject: `New inquiry — ${name}`, html: staffHtml, replyTo: email }),
+    const [customerResult, staffResult] = await Promise.all([
+      sendEmailSafe({ to: email, subject: "We received your message — Aurura Event Center", html: customerHtml }),
+      sendEmailSafe({ to: venueNotifyAddress(), subject: `New inquiry — ${name}`, html: staffHtml, replyTo: email }),
     ]);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, customerEmail: customerResult, staffEmail: staffResult });
   } catch (err) {
     console.error("[api/contact]", err);
     return NextResponse.json({ ok: false, error: "Email delivery failed" }, { status: 200 });

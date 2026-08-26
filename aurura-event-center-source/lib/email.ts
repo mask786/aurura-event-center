@@ -43,6 +43,25 @@ export function venueNotifyAddress() {
   return VENUE_NOTIFY_EMAIL;
 }
 
+/**
+ * Same as sendEmail, but never throws — one recipient failing (e.g. a venue
+ * notification address that isn't allowed yet under Resend's sandbox mode)
+ * shouldn't take down a customer-facing email sent in the same request, and
+ * the caller shouldn't need its own try/catch to keep the two independent.
+ */
+export async function sendEmailSafe(
+  opts: Parameters<typeof sendEmail>[0]
+): Promise<{ ok: boolean; skipped?: boolean; id?: string; error?: string }> {
+  try {
+    const result = await sendEmail(opts);
+    return { ok: true, ...result };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error(`[email] Failed to send "${opts.subject}" to ${opts.to}:`, message);
+    return { ok: false, error: message };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Shared layout so every email looks like it belongs to Aurura.
 // ---------------------------------------------------------------------------

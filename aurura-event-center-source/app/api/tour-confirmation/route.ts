@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail, emailShell, venueNotifyAddress } from "@/lib/email";
+import { sendEmailSafe, emailShell, venueNotifyAddress } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,12 +41,12 @@ export async function POST(req: NextRequest) {
       ${notes ? `<p style="margin-top:14px; font-size:14px; color:#4a453d;"><strong>Notes:</strong> ${notes}</p>` : ""}
     `);
 
-    await Promise.all([
-      sendEmail({ to: email, subject: "Your tour at Aurura Event Center is confirmed", html: customerHtml }),
-      sendEmail({ to: venueNotifyAddress(), subject: `New tour booked — ${firstName} ${lastName ?? ""}`, html: staffHtml, replyTo: email }),
+    const [customerResult, staffResult] = await Promise.all([
+      sendEmailSafe({ to: email, subject: "Your tour at Aurura Event Center is confirmed", html: customerHtml }),
+      sendEmailSafe({ to: venueNotifyAddress(), subject: `New tour booked — ${firstName} ${lastName ?? ""}`, html: staffHtml, replyTo: email }),
     ]);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, customerEmail: customerResult, staffEmail: staffResult });
   } catch (err) {
     console.error("[api/tour-confirmation]", err);
     // Don't fail the booking flow just because email delivery failed.
