@@ -1,21 +1,13 @@
-"use client";
+import { pageMetadata } from "@/lib/seo";
+import { ScheduleTourPageClient } from "./ScheduleTourPageClient";
 
-import { useLanguage } from "@/lib/language-context";
-import { TourScheduler } from "@/components/booking/TourScheduler";
-import { Reveal } from "@/components/ui/Reveal";
+export const metadata = pageMetadata({
+  title: "Schedule a Tour",
+  description:
+    "Book a 30-minute in-person tour of Aurura Event Center. Pick a date and time that works for you and see the ballroom for yourself.",
+  path: "/schedule-tour",
+});
 
-export default function ScheduleTourPage() {
-  const { t } = useLanguage();
-  return (
-    <div className="pt-32 md:pt-40 pb-24 md:pb-32 bg-ivory min-h-screen">
-      <div className="container-aurura">
-        <Reveal className="max-w-2xl mx-auto text-center mb-14">
-          <p className="eyebrow mb-4">{t.tour.eyebrow}</p>
-          <h1 className="font-serif-display text-3xl md:text-5xl leading-tight mb-5 text-balance">{t.tour.title}</h1>
-          <p className="text-charcoal-soft/80 leading-relaxed">{t.tour.body}</p>
-        </Reveal>
-        <TourScheduler />
-      </div>
-    </div>
-  );
+export default function Page() {
+  return <ScheduleTourPageClient />;
 }

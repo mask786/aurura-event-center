@@ -5,7 +5,9 @@ import { LanguageProvider } from "@/lib/language-context";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MobileActionBar } from "@/components/MobileActionBar";
+import { StructuredData } from "@/components/StructuredData";
 import { venue } from "@/lib/config";
+import { pageMetadata } from "@/lib/seo";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -21,15 +23,21 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: `${venue.name} | Premium Event Venue in Cedar Hollow, TX`,
-  description:
-    "A refined ballroom for weddings, quinceañeras, and unforgettable celebrations. Explore packages, build your event, and schedule a tour at Aurura Event Center.",
+  ...pageMetadata({
+    title: `${venue.name} | Premium Event Venue in Cedar Hollow, TX`,
+    description:
+      "A refined ballroom for weddings, quinceañeras, and unforgettable celebrations. Explore packages, build your event, and schedule a tour at Aurura Event Center.",
+    path: "/",
+  }),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aurura-event-center-app.vercel.app"),
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${playfair.variable} ${jost.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-ivory text-charcoal">
+        <StructuredData />
         <LanguageProvider>
           <Header />
           <main className="flex-1">{children}</main>
